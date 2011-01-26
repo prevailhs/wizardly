@@ -129,7 +129,7 @@ class GeneratedController < ApplicationController
     protected
   def _on_wizard_finish
     return if @wizard_completed_flag
-    @user.save_without_validation! if @user.changed?
+    @user.save(:validate => false) if @user.changed?
     @wizard_completed_flag = true
     reset_wizard_form_data
     _wizard_final_redirect_to(:completed)
@@ -180,7 +180,7 @@ class GeneratedController < ApplicationController
   def guard_entry 
     if (r = request.env['HTTP_REFERER'])
       begin
-        h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
+        h = Rails.application.routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
         return check_progression if (h[:controller]||'') == 'generated'
@@ -208,7 +208,7 @@ class GeneratedController < ApplicationController
 
   def complete_wizard(redirect = nil)
     unless @wizard_completed_flag
-      @user.save_without_validation!
+      @user.save(:validate => false)
       callback_performs_action?(:_after_wizard_save)
     end
     redirect_to redirect if (redirect && !self.performed?)
@@ -234,7 +234,7 @@ class GeneratedController < ApplicationController
   def _preserve_wizard_model
     return unless (@user && !@wizard_completed_flag)
     if self.wizard_config.persist_model_per_page?
-      @user.save_without_validation!
+      @user.save(:validate => false)
       if request.get?
         @user.errors.clear
       else

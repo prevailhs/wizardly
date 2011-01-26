@@ -159,7 +159,7 @@ ENSURE
   protected
   def _on_wizard_#{finish}
     return if @wizard_completed_flag
-    @#{self.model}.save_without_validation! if @#{self.model}.changed?
+    @#{self.model}.save(:validate => false) if @#{self.model}.changed?
     @wizard_completed_flag = true
     reset_wizard_form_data
     _wizard_final_redirect_to(:completed)
@@ -222,7 +222,7 @@ PROGRESSION
   def guard_entry 
     if (r = request.env['HTTP_REFERER'])
       begin
-        h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
+        h = Rails.application.routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
         return check_progression if (h[:controller]||'') == '#{self.controller_path}'
@@ -249,7 +249,7 @@ SESSION
   def guard_entry 
     if (r = request.env['HTTP_REFERER'])
       begin
-        h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
+        h = Rails.application.routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
         return check_progression if (h[:controller]||'') == '#{self.controller_path}'
@@ -277,7 +277,7 @@ SANDBOX
 
   def complete_wizard(redirect = nil)
     unless @wizard_completed_flag
-      @#{self.model}.save_without_validation!
+      @#{self.model}.save(:validate => false)
       callback_performs_action?(:_after_wizard_save)
     end
     redirect_to redirect if (redirect && !self.performed?)
@@ -303,7 +303,7 @@ SANDBOX
   def _preserve_wizard_model
     return unless (@#{self.model} && !@wizard_completed_flag)
     if self.wizard_config.persist_model_per_page?
-      @#{self.model}.save_without_validation!
+      @#{self.model}.save(:validate => false)
       if request.get?
         @#{self.model}.errors.clear
       else

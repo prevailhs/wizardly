@@ -34,7 +34,7 @@ class MainController < ApplicationController
   private
   def referring_controller
     referer = request.env['HTTP_REFERER']    
-    ActionController::Routing::Routes.recognize_path(URI.parse(referer).path)[:controller]
+    Rails.application.routes.recognize_path(URI.parse(referer).path)[:controller]
   end
 
 end
