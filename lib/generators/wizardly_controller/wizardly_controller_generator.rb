@@ -5,8 +5,8 @@ class WizardlyControllerGenerator < Rails::Generators::Base
   source_root File.expand_path("../templates", __FILE__)
   argument :controller_name, :type => :string, :required => true
   argument :model_name, :type => :string, :required => true
-  argument :completed_redirect, :type => :string, :required => false, :description => "URL to redirect to after completing the wizard"
-  argument :canceled_redirect, :type => :string, :required => false, :description => "URL to redirect to after canceling the wizard"
+  class_option :completed_redirect, :type => :string, :required => false, :description => "URL to redirect to after completing the wizard"
+  class_option :canceled_redirect, :type => :string, :required => false, :description => "URL to redirect to after canceling the wizard"
   
   def add_controller
     template "controller.rb.erb", "app/controllers/#{controller_name}_controller.rb"
