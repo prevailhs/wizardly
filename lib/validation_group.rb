@@ -1,29 +1,29 @@
-module ActiveModel
-  class Errors < ActiveSupport::OrderedHash
-    def add_with_validation_group(attribute,
-        msg = @@default_error_messages[:invalid], *args, &block)
+module ValidationGroup
+  module ActiveModel
+    module Errors
+      def add_with_validation_group(attribute,
+          msg = @@default_error_messages[:invalid], *args, &block)
 
-        # jeffp: setting @current_validation_fields and use of should_validate? optimizes code
-        add_error = @base.respond_to?(:should_validate?) ? @base.should_validate?(attribute.to_sym) : true
-        add_without_validation_group(attribute, msg, *args, &block) if add_error
-    end
+          # jeffp: setting @current_validation_fields and use of should_validate? optimizes code
+          add_error = @base.respond_to?(:should_validate?) ? @base.should_validate?(attribute.to_sym) : true
+          add_without_validation_group(attribute, msg, *args, &block) if add_error
+      end
 
-    def remove_on(attributes)
-      return unless attributes
+      def remove_on(attributes)
+        return unless attributes
 
-      attributes = [attributes] unless attributes.is_a?(Array)
-      self.reject!{|k,v| !attributes.include?(k.to_sym)}
-    end
-    
-    def self.included(base) #:nodoc:
-      base.class_eval do
-        alias_method_chain :add, :validation_group
+        attributes = [attributes] unless attributes.is_a?(Array)
+        self.reject!{|k,v| !attributes.include?(k.to_sym)}
+      end
+
+      def self.included(base) #:nodoc:
+        base.class_eval do
+          alias_method_chain :add, :validation_group
+        end
       end
     end
   end
-end
 
-module ValidationGroup
   module InstanceMethods # included in every model which calls validation_group
     #needs testing
   #      def reset_fields_for_validation_group(group)
@@ -146,3 +146,4 @@ end
 # jeffp:  moved from init.rb for gemification purposes -- 
 # require 'validation_group' loads everything now, init.rb requires 'validation_group' only
 ActiveRecord::Base.send(:extend, ValidationGroup::ActsMethods)
+ActiveModel::Errors.send(:include, ValidationGroup::ActiveModel::Errors)
