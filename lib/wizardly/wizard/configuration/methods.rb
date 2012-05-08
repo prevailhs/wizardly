@@ -318,7 +318,7 @@ SANDBOX
       end
       self.wizard_form_data = {'id'=>@#{self.model}.id}
     else
-      self.wizard_form_data = @#{self.model}.attributes
+      self.wizard_form_data = @#{self.model}.wizardly_attributes
     end
   end
   hide_action :_build_wizard_model, :_preserve_wizard_model

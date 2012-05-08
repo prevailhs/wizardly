@@ -40,6 +40,16 @@ module ValidationGroup
           alias_method_chain :valid?, :validation_group
         end
       end
+
+      # TODO Consider making a more formal accessor for this class attribute
+      def wizardly_attribute(name)
+        attr_accessor name
+        wizardly_attributes << name
+      end
+
+      def wizardly_attributes
+        (@wizardly_attributes ||= [])
+      end
     end
 
     module InstanceMethods # included in every model which calls validation_group
@@ -99,6 +109,13 @@ module ValidationGroup
       def valid_with_validation_group?(group=nil)
         self.enable_validation_group(group) if group
         valid_without_validation_group?
+      end
+
+      # Exposes a hook to add more attributes to persist with wizardly
+      def wizardly_attributes
+        self.class.wizardly_attributes.inject(attributes) do |attrs, attr_name|
+          attrs.merge(attr_name.to_s => send(attr_name))
+        end
       end
     end
 

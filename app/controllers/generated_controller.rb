@@ -41,46 +41,6 @@ class GeneratedController < ApplicationController
   end        
 
 
-  # init action method
-  def init
-    begin
-      @step = :init
-      @wizard = wizard_config
-      @title = 'Init'
-      @description = ''
-      _build_wizard_model
-      if request.post? && callback_performs_action?(:_on_post_init_form)
-        raise CallbackError, "render or redirect not allowed in :on_post(:init) callback", caller
-      end
-      button_id = check_action_for_button
-      return if performed?
-      if request.get?
-        return if callback_performs_action?(:_on_get_init_form)
-        render_wizard_form
-        return
-      end
-
-      # @user.enable_validation_group :init
-      unless @user.valid?(:init)
-        return if callback_performs_action?(:_on_invalid_init_form)
-        render_wizard_form
-        return
-      end
-
-      @do_not_complete = false
-      if button_id == :finish
-        callback_performs_action?(:_on_init_form_finish)
-        complete_wizard unless @do_not_complete
-        return
-      end
-      return if callback_performs_action?(:_on_init_form_next)
-      redirect_to :action=>:second
-    ensure
-      _preserve_wizard_model
-    end
-  end        
-
-
   # second action method
   def second
     begin
@@ -115,6 +75,46 @@ class GeneratedController < ApplicationController
       end
       return if callback_performs_action?(:_on_second_form_next)
       redirect_to :action=>:finish
+    ensure
+      _preserve_wizard_model
+    end
+  end        
+
+
+  # init action method
+  def init
+    begin
+      @step = :init
+      @wizard = wizard_config
+      @title = 'Init'
+      @description = ''
+      _build_wizard_model
+      if request.post? && callback_performs_action?(:_on_post_init_form)
+        raise CallbackError, "render or redirect not allowed in :on_post(:init) callback", caller
+      end
+      button_id = check_action_for_button
+      return if performed?
+      if request.get?
+        return if callback_performs_action?(:_on_get_init_form)
+        render_wizard_form
+        return
+      end
+
+      # @user.enable_validation_group :init
+      unless @user.valid?(:init)
+        return if callback_performs_action?(:_on_invalid_init_form)
+        render_wizard_form
+        return
+      end
+
+      @do_not_complete = false
+      if button_id == :finish
+        callback_performs_action?(:_on_init_form_finish)
+        complete_wizard unless @do_not_complete
+        return
+      end
+      return if callback_performs_action?(:_on_init_form_next)
+      redirect_to :action=>:second
     ensure
       _preserve_wizard_model
     end
@@ -183,7 +183,7 @@ class GeneratedController < ApplicationController
         h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
-        return check_progression if (h[:controller]||'') == 'generated'
+        return check_progression if (h[:controller]||'') == controller_path
         self.initial_referer = h unless self.initial_referer
       end
     end
@@ -242,7 +242,7 @@ class GeneratedController < ApplicationController
       end
       self.wizard_form_data = {'id'=>@user.id}
     else
-      self.wizard_form_data = @user.attributes
+      self.wizard_form_data = @user.wizardly_attributes
     end
   end
   hide_action :_build_wizard_model, :_preserve_wizard_model
@@ -365,11 +365,11 @@ class GeneratedController < ApplicationController
   def self.on_next(*args, &block)
     self._define_action_callback_macro('on_next', '_on_%s_form_next', *args, &block)
   end
-  def self.on_back(*args, &block)
-    self._define_action_callback_macro('on_back', '_on_%s_form_back', *args, &block)
-  end
   def self.on_cancel(*args, &block)
     self._define_action_callback_macro('on_cancel', '_on_%s_form_cancel', *args, &block)
+  end
+  def self.on_back(*args, &block)
+    self._define_action_callback_macro('on_back', '_on_%s_form_back', *args, &block)
   end
   def self._define_action_callback_macro(macro_first, macro_last, *args, &block)
     return if args.empty?
