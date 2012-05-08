@@ -71,6 +71,13 @@ EVENTS
         mb.string
       end
 
+      # TODO With namespaced controllers calling this on initialization 
+      # results in the wrong full path (i.e. Foo::BarController => 
+      # 'bar_controller' instead of 'foo/bar_controller').  We use the runtime 
+      # instance method for route comparison because its required; we would 
+      # like to do something similar here, but it only affects if we had two 
+      # similar named controllers under different namespaces, in which case 
+      # they would share the same persisted data.
       def initial_referer_key
         @initial_referer_key ||= "#{self.controller_path.sub(/\//, '')}_irk".to_sym
       end
@@ -225,7 +232,7 @@ PROGRESSION
         h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
-        return check_progression if (h[:controller]||'') == '#{self.controller_path}'
+        return check_progression if (h[:controller]||'') == controller_path
         self.initial_referer = h unless self.initial_referer
       end
     end
@@ -252,7 +259,7 @@ SESSION
         h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
-        return check_progression if (h[:controller]||'') == '#{self.controller_path}'
+        return check_progression if (h[:controller]||'') == controller_path
         self.initial_referer = h
       end
     else
