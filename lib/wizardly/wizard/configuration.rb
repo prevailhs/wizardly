@@ -118,7 +118,7 @@ module Wizardly
             @pages[page.id] = page
           end
         rescue Exception => e
-          raise ValidationGroupError, "Failed to configure wizard from #{@wizard_model_class_name} validation groups: " + e.message, caller
+          raise ValidationGroupError, "Failed to configure wizard from #{@wizard_model_class_name} validation groups: " + e.message + "\n" + e.backtrace.join("\n"), caller
         end
       end
 
