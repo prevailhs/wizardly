@@ -18,6 +18,7 @@ end
 
 
 describe CallbacksController do
+  fixtures :users
 
   it "should flag callbacks and render when requesting the init form" do
     get :init
@@ -49,9 +50,19 @@ describe CallbacksController do
     response.should redirect_to(:controller=>:main, :action=>:canceled)
   end
   it "should flag callbacks and redirect to :completed page when posting finish to the finish page" do
+    # Ensure our session has a partially completed user
+    session[CallbacksController.wizard_config.persist_key] = {"id" => users(:before_finish).id}
     post :finish, {:commit=>'Finish', :user=>{:username=>'johndoe', :password=>'password', :password_confirmation=>'password'}}
     assigns.should have_callback(:on_post_finish_form, :on_finish_form_finish, :_on_wizard_finish)
     response.should redirect_to(:controller=>:main, :action=>:finished)
+  end
+  
+  # TODO This should move somewhere else, probably should make a mis-configured model/controller
+  # and make a spec specifically for that
+  it "should raise an error when posting finish to the finish page with incomplete data" do
+    lambda {
+      post :finish, {:commit=>'Finish', :user=>{:username=>'johndoe', :password=>'password', :password_confirmation=>'password'}}
+    }.should raise_error
   end
 end
 

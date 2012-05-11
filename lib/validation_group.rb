@@ -36,8 +36,6 @@ module ValidationGroup
           # jeffp: added reader for current_validation_fields
           attr_reader :current_validation_group, :current_validation_fields
           include InstanceMethods
-          # jeffp: add valid?(group = nil), see definition below
-          alias_method_chain :valid?, :validation_group
         end
       end
 
@@ -104,11 +102,14 @@ module ValidationGroup
         respond_to?(:current_validation_group) && !current_validation_group.nil?
       end
 			
-      # eliminates need to use :enable_validation_group before :valid? call --
-      # nice
-      def valid_with_validation_group?(group=nil)
-        self.enable_validation_group(group) if group
-        valid_without_validation_group?
+      # Don't override valid? as that causes abnormal and hard to track down 
+      # behavior; instead provide a valid_for that ensures validiation group 
+      # is enabled then disabled
+      def valid_for_validation_group?(group)
+        self.enable_validation_group(group)
+        result = valid?
+        self.disable_validation_group
+        result
       end
 
       # Exposes a hook to add more attributes to persist with wizardly

@@ -5,3 +5,23 @@
 #
 # two:
 #   column: value
+
+before_second:
+  first_name: MyString
+  last_name: MyString
+  age:
+  gender:
+  programmer:
+  status:
+  username:
+  password:
+
+before_finish:
+  first_name: MyString
+  last_name: MyString
+  age: 1
+  gender: MyString
+  programmer: false
+  status: MyString
+  username: 
+  password:

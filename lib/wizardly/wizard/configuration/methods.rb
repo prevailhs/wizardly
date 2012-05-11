@@ -112,8 +112,8 @@ EVENTS
         return
       end
 
-      # @#{self.model}.enable_validation_group :#{id}
-      unless @#{self.model}.valid?(:#{id})
+      # Check validity for this particular validation grouo
+      unless @#{self.model}.valid_for_validation_group?(:#{id})
         return if callback_performs_action?(:_on_invalid_#{id}_form)
         render_wizard_form
         return
@@ -166,7 +166,10 @@ ENSURE
   protected
   def _on_wizard_#{finish}
     return if @wizard_completed_flag
-    @#{self.model}.save_without_validation! if @#{self.model}.changed?
+    # Force normal save so we don't break business logic from model;
+    # if validation_groups are misconfigured or there are other code errors
+    # this will force them to be addressed.
+    @#{self.model}.save! if @#{self.model}.changed?
     @wizard_completed_flag = true
     reset_wizard_form_data
     _wizard_final_redirect_to(:completed)
@@ -284,7 +287,10 @@ SANDBOX
 
   def complete_wizard(redirect = nil)
     unless @wizard_completed_flag
-      @#{self.model}.save_without_validation!
+      # Force normal save so we don't break business logic from model;
+      # if validation_groups are misconfigured or there are other code errors
+      # this will force them to be addressed.
+      @#{self.model}.save!
       callback_performs_action?(:_after_wizard_save)
     end
     redirect_to redirect if (redirect && !self.performed?)

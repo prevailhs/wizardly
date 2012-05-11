@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 
 describe Callbacks3Controller do
+  fixtures :users
 
   it "should redirect when getting all forms" do
     get :init
@@ -48,6 +49,8 @@ describe Callbacks3Controller do
     response.should redirect_to('/main/index#on_init_and_finish_form_cancel')
   end
   it "should redirect when posting finish to the finish page" do
+    # Ensure our session has a partially completed user
+    session[Callbacks3Controller.wizard_config.persist_key] = {"id" => users(:before_finish).id}
     post :finish, {:commit=>'Finish', :user=>{:username=>'johndoe', :password=>'password', :password_confirmation=>'password'}}
     response.should redirect_to('/main/index#on_finish_form_finish')
   end
