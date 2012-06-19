@@ -48,6 +48,16 @@ module ValidationGroup
       def wizardly_attributes
         (@wizardly_attributes ||= [])
       end
+
+      # Expose helper to declare a nested attribute that should come along 
+      # with the saved wizardly items
+      def wizardly_nested_attributes_for(*names)
+        wizardly_nested_attributes.concat(names)
+      end
+
+      def wizardly_nested_attributes
+        (@wizardly_nested_attributes ||= [])
+      end
     end
 
     module InstanceMethods # included in every model which calls validation_group
@@ -116,7 +126,12 @@ module ValidationGroup
       def wizardly_attributes
         self.class.wizardly_attributes.inject(attributes) do |attrs, attr_name|
           attrs.merge(attr_name.to_s => send(attr_name))
-        end
+        end.merge(self.class.wizardly_nested_attributes.inject({}) do |attrs, nested_name|
+          i = 0
+          attrs.merge("#{nested_name}_attributes" => send(nested_name).inject({}) do |h, obj|
+            h.merge((i += 1).to_s => obj.wizardly_attributes)
+          end)
+        end)
       end
     end
 
