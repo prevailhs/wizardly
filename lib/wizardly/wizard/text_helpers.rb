@@ -9,7 +9,7 @@ module Wizardly
         underscore_button_name(str).to_sym
       end
       def symbol_to_button_name(sym)
-        sym.to_s.gsub(/_/, ' ').squeeze(' ').titleize
+        sym.to_s.gsub(/_/, ' ').squeeze(' ').titleize.html_safe
       end
     end
   end

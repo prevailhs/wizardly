@@ -18,7 +18,7 @@ module Wizardly
       #used in the dsl
       def name_to(name, opts={})
         case name
-        when String then @name = name.strip.squeeze(' ')
+        when String then @name = name.strip.squeeze(' ').html_safe
         when Symbol then @name = symbol_to_button_name(name)
         end
         @id = opts[:id] if (opts[:id] && opts[:id].is_a?(Symbol))
