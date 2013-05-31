@@ -232,7 +232,7 @@ PROGRESSION
   def guard_entry 
     if (r = request.env['HTTP_REFERER'])
       begin
-        h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
+        h = Rails.application.routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
         return check_progression if (h[:controller]||'') == controller_path
@@ -259,7 +259,7 @@ SESSION
   def guard_entry 
     if (r = request.env['HTTP_REFERER'])
       begin
-        h = ::ActionController::Routing::Routes.recognize_path(URI.parse(r).path, {:method=>:get})
+        h = Rails.application.routes.recognize_path(URI.parse(r).path, {:method=>:get})
       rescue
       else
         return check_progression if (h[:controller]||'') == controller_path
@@ -316,7 +316,7 @@ SANDBOX
   def _preserve_wizard_model
     return unless (@#{self.model} && !@wizard_completed_flag)
     if self.wizard_config.persist_model_per_page?
-      @#{self.model}.save_without_validation!
+      @#{self.model}.save
       if request.get?
         @#{self.model}.errors.clear
       else
