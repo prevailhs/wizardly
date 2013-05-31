@@ -301,16 +301,17 @@ SANDBOX
   def _build_wizard_model
     if self.wizard_config.persist_model_per_page?
       h = self.wizard_form_data
+      unprotected_attributes = (params[:#{self.model}] || {}).except(*#{self.model_class_name}.protected_attributes)
       if (h && model_id = h['id'])
           _model = #{self.model_class_name}.find(model_id)
-          _model.attributes = params[:#{self.model}]||{}
+          _model.attributes = unprotected_attributes
           @#{self.model} = _model
           return
       end
-      @#{self.model} = #{self.model_class_name}.new(params[:#{self.model}])
+      @#{self.model} = #{self.model_class_name}.new(unprotected_attributes)
     else # persist data in session or flash
-      h = (self.wizard_form_data||{}).merge(params[:#{self.model}] || {})
-      @#{self.model} = #{self.model_class_name}.new(h)
+      unprotected_attributes = (self.wizard_form_data||{}).merge(params[:#{self.model}] || {}).except(*#{self.model_class_name}.protected_attributes)
+      @#{self.model} = #{self.model_class_name}.new(unprotected_attributes)
     end
   end
   def _preserve_wizard_model
