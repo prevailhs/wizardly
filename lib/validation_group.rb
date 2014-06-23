@@ -61,7 +61,7 @@ module ValidationGroup
       return unless validation_group_enabled?
       self.errors.remove_on(@current_validation_fields)
     end
-    
+
     # jeffp: optimizer for someone writing custom :validate method -- no need
     # to validate fields outside the current validation group note: could also
     # use in validation modules to improve performance
@@ -72,9 +72,9 @@ module ValidationGroup
     def validation_group_enabled?
       respond_to?(:current_validation_group) && !current_validation_group.nil?
     end
-    
-    # Don't override valid? as that causes abnormal and hard to track down 
-    # behavior; instead provide a valid_for that ensures validation group is 
+
+    # Don't override valid? as that causes abnormal and hard to track down
+    # behavior; instead provide a valid_for that ensures validation group is
     # enabled then disabled
     def valid_for_validation_group?(group)
       self.enable_validation_group(group)
@@ -88,6 +88,7 @@ module ValidationGroup
       self.class.wizardly_attributes.inject(attributes) do |attrs, attr_name|
         attrs.merge(attr_name.to_s => send(attr_name))
       end.merge(self.class.wizardly_nested_attributes.inject({}) do |attrs, nested_name|
+        i = 0
         attrs.merge("#{nested_name}_attributes" => send(nested_name).inject({}) do |h, obj|
           h.merge((i += 1).to_s => obj.wizardly_attributes)
         end)
@@ -102,7 +103,7 @@ module ValidationGroup
       base.class_eval do
         cattr_accessor :validation_group_classes
         self.validation_group_classes = {}
-        
+
         def self.validation_group_order; @validation_group_order; end
         def self.validation_groups(all_classes = false)
           return (self.validation_group_classes[self] || {}) unless all_classes
@@ -144,7 +145,7 @@ module ValidationGroup
       (@wizardly_attributes ||= [])
     end
 
-    # Expose helper to declare a nested attribute that should come along with 
+    # Expose helper to declare a nested attribute that should come along with
     # the saved wizardly items
     def wizardly_nested_attributes_for(*names)
       wizardly_nested_attributes.concat(names)
@@ -173,7 +174,7 @@ module ValidationGroup
   end
 end
 
-# jeffp:  moved from init.rb for gemification purposes -- 
+# jeffp:  moved from init.rb for gemification purposes --
 # require 'validation_group' loads everything now, init.rb requires 'validation_group' only
 ActiveRecord::Base.send(:extend, ValidationGroup::ActsMethods)
 ActiveModel::Errors.send(:include, ValidationGroup::ActiveModel::Errors)
